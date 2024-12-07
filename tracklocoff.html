@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #locationDisplay {
+            margin-top: 15px;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Location Tracker</h1>
+        <button id="getLocationBtn">Get My Location</button>
+        <div id="locationDisplay"></div>
+        <button id="sendLocationBtn" disabled>Send Location to Admin</button>
+    </div>
+
+    <script>
+        // Function to get the user's location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    let latitude = position.coords.latitude;
+                    let longitude = position.coords.longitude;
+                    displayLocation(latitude, longitude);
+                    storeLocationLocally(latitude, longitude);
+                }, function(error) {
+                    alert("Error getting location: " + error.message);
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Function to display the location on the webpage
+        function displayLocation(latitude, longitude) {
+            const locationDisplay = document.getElementById("locationDisplay");
+            locationDisplay.innerHTML = `Latitude: ${latitude}<br>Longitude: ${longitude}`;
+            document.getElementById("sendLocationBtn").disabled = false;
+        }
+
+        // Function to store the location in localStorage
+        function storeLocationLocally(latitude, longitude) {
+            localStorage.setItem("latitude", latitude);
+            localStorage.setItem("longitude", longitude);
+        }
+
+        // Function to send location to admin via SMS (using backend)
+        function sendLocationToAdmin() {
+            const latitude = localStorage.getItem("latitude");
+            const longitude = localStorage.getItem("longitude");
+            const adminPhoneNumber = "+1234567890";  // Replace with the admin's phone number
+
+            // Call backend to send the SMS
+            fetch("/send-sms", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    phone: adminPhoneNumber,
+                    latitude: latitude,
+                    longitude: longitude
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("Location sent to admin!");
+            })
+            .catch(error => {
+                console.error("Error sending SMS:", error);
+                alert("Failed to send location.");
+            });
+        }
+
+        // Event listeners
+        document.getElementById("getLocationBtn").addEventListener("click", getLocation);
+        document.getElementById("sendLocationBtn").addEventListener("click", sendLocationToAdmin);
+    </script>
+
+</body>
+</html>
+
