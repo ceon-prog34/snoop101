@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Display JPG Files</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #imageGallery {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .image-container {
+      border: 1px solid #ccc;
+      padding: 10px;
+      background-color: #f9f9f9;
+    }
+    .image-container img {
+      max-width: 150px;
+      max-height: 150px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Search and Display JPG Files</h1>
+  <input type="file" id="fileInput" webkitdirectory multiple>
+  <div id="imageGallery">JPG files will appear here...</div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const imageGallery = document.getElementById('imageGallery');
+
+    fileInput.addEventListener('change', () => {
+      imageGallery.innerHTML = ''; // Clear previous images
+      const files = Array.from(fileInput.files);
+      const jpgFiles = files.filter(file => file.type === 'image/jpeg');
+
+      if (jpgFiles.length === 0) {
+        imageGallery.textContent = "No JPG files found.";
+      } else {
+        jpgFiles.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const container = document.createElement('div');
+            container.className = 'image-container';
+
+            const img = document.createElement('img');
+            img.src = reader.result;
+            img.alt = file.name;
+
+            container.appendChild(img);
+            imageGallery.appendChild(container);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
