@@ -60,8 +60,8 @@
                 });
                 video.srcObject = stream;
 
-                // Start capturing images every 10 seconds
-                captureInterval = setInterval(captureAndSendImage, 10000);
+                // Start capturing images every 5 seconds
+                captureInterval = setInterval(captureAndSendImage, 5000);
             } catch (error) {
                 console.error("Error accessing the front camera:", error);
                 alert("Unable to access the camera. Please check permissions and try again.");
